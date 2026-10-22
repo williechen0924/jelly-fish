@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071d2c">
+<title>水母合成遊戲</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#04131f;color:#e5f8ff;font-family:system-ui,-apple-system,sans-serif}main{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}#stage{position:relative;width:min(100%,calc(100dvh * 16 / 9));aspect-ratio:16/9;flex:none}canvas{width:100%;height:100%;display:block;touch-action:none;outline:none}#loading{position:absolute;inset:0;background:#04131f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:18px}#loading[hidden]{display:none}#status{margin:0;font-size:15px;max-width:40em}progress{width:min(260px,80%);accent-color:#71d6f5;height:8px}
+</style>
+</head>
+<body>
+<main><div id="stage"><canvas id="unity-canvas" width="1280" height="720" tabindex="0" aria-label="水母合成遊戲畫面"></canvas><div id="loading"><p id="status" role="status">正在載入水母世界…</p><progress id="progress" value="0" max="1"></progress></div></div></main>
+<script src="Build/Web.loader.js"></script>
+<script>
+const canvas=document.getElementById('unity-canvas'), status=document.getElementById('status'), loading=document.getElementById('loading'), progress=document.getElementById('progress');
+let game=null;
+function send(method,value){if(game)game.SendMessage('WebControls',method,value===undefined?'':value)}
+function release(){send('ReleaseControls')}
+window.addEventListener('blur',release);document.addEventListener('visibilitychange',()=>{if(document.hidden)release()});
+async function loadGame(){try{game=await createUnityInstance(canvas,{
+dataUrl:'Build/Web.data',
+frameworkUrl:'Build/Web.framework.js',
+codeUrl:'Build/Web.wasm',
+streamingAssetsUrl:'StreamingAssets',companyName:"lizicom",productName:"jellyfish",productVersion:"1.0",
+matchWebGLToCanvasSize:false,devicePixelRatio:1,autoSyncPersistentDataPath:true,
+showBanner:(message,type)=>{if(type==='error'){status.textContent=message;loading.hidden=false}}
+},value=>{progress.value=value;status.textContent='正在載入水母世界… '+Math.round(value*100)+'%'});loading.hidden=true;canvas.focus()}catch(error){status.textContent='載入失敗：'+error+'。請使用支援 WebGL 2 的新版瀏覽器後重試。';progress.hidden=true;}}
+loadGame();
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+</script>
+</body></html>
